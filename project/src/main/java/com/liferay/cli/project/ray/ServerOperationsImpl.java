@@ -124,7 +124,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         fileManager.createOrUpdateTextFileIfRequired(
             serverPom.getPath(), XmlUtils.nodeToString( serverPomDocument ), addModuleMessage, false );
 
-        GAV plugin = new GAV( "org.apache.tomcat.maven", "tomcat7-maven-plugin", "2.1" );
+        GAV plugin = new GAV( "com.liferay.maven.plugins", "liferay-tomcat7-maven-plugin", "1.0.0-SNAPSHOT" );
         Dependency dep = new Dependency( parentGAV.getGroupId(), parentGAV.getArtifactId() + "-logfix", parentGAV.getVersion() );
 
         addPluginDependency( serverModuleName, plugin, dep, serverPomDocument, serverPomRoot );
@@ -213,14 +213,15 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
 
     private String getServerStopMavenCommand()
     {
-        return null;
+        //TODO RAY throws error because need -pl and -am
+        return "-Dmaven.test.skip=true liferay-tomcat7:shutdown-liferay";
     }
 
     private String getServerRunMavenCommand( String logfixArtifactId, String serverArtifactId )
     {
         StringBuffer sb = new StringBuffer();
 
-        sb.append( "-Dmaven.test.skip verify tomcat7:run-war -pl :");
+        sb.append( "-Dmaven.test.skip=true verify liferay-tomcat7:run-liferay -pl :");
         sb.append( logfixArtifactId );
         sb.append( ",:" );
         sb.append( serverArtifactId );

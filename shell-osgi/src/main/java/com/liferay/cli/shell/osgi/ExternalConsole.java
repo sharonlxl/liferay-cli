@@ -9,4 +9,6 @@ public interface ExternalConsole
 
     Process execute( String workingDir, String cmd, String argLine );
 
+    Process executeQuiet( String workingDir, String cmd, String argLine );
+
 }

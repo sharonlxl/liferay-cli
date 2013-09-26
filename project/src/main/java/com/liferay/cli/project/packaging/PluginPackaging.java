@@ -3,16 +3,16 @@ package com.liferay.cli.project.packaging;
 
 import com.liferay.cli.model.JavaPackage;
 import com.liferay.cli.project.GAV;
+import com.liferay.cli.project.MavenOperations;
 import com.liferay.cli.project.Path;
 import com.liferay.cli.project.PomManagementService;
 import com.liferay.cli.project.ProjectOperations;
-import com.liferay.cli.project.maven.Pom;
-import com.liferay.cli.shell.osgi.ExternalConsoleProvider;
 import com.liferay.cli.shell.osgi.ExternalConsoleProviderRegistry;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 
+import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 
 /**
@@ -20,6 +20,7 @@ import org.apache.felix.scr.annotations.Reference;
  *
  * @author Gregory Amerson
  */
+@Component( componentAbstract = true )
 public abstract class PluginPackaging extends AbstractCorePackagingProvider
 {
 
@@ -28,6 +29,9 @@ public abstract class PluginPackaging extends AbstractCorePackagingProvider
 
     @Reference
     private PomManagementService pomManagementService;
+
+    @Reference
+    private MavenOperations mavenOperations;
 
     /**
      * Constructor
@@ -42,29 +46,21 @@ public abstract class PluginPackaging extends AbstractCorePackagingProvider
         JavaPackage topLevelPackage, String nullableProjectName, String artifactId, String javaVersion, GAV parentPom,
         String module, ProjectOperations projectOperations )
     {
+//        String pomPath = super.createArtifacts(
+//            topLevelPackage, nullableProjectName, artifactId, javaVersion, parentPom, module, projectOperations );
+
         // execute mvn archetype command
-        final Pom pluginsPom = pomManagementService.getPomFromModuleName( "plugins" );
-        final File pluginsPomFile = new File( pluginsPom.getPath() );
-        final String workingDir = pluginsPomFile.getParent(); // TODO RAY handle unexpected results better
-
-        ExternalConsoleProvider externalShellProvider = externalShellProviderRegistry.getExternalShellProvider();
-
         final String args = getNewLiferayMavenArchetypeArgs( getId(), artifactId, parentPom.getGroupId() );
-
-        Process process = externalShellProvider.getConsole().execute( workingDir, "mvn", args );
 
         try
         {
-            process.waitFor();
+            mavenOperations.executeMvnCommand( args );
         }
-        catch( InterruptedException e )
+        catch( IOException e1 )
         {
-            //TODO RAY handle this error
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
-
-        // delete the pom file created from archetype
-        final File portletPomFile = new File( pluginsPomFile.getParentFile(), artifactId + "/pom.xml" );
-        portletPomFile.delete();
 
         return super.createArtifacts(
             topLevelPackage, nullableProjectName, artifactId, javaVersion, parentPom, module, projectOperations );
@@ -75,7 +71,7 @@ public abstract class PluginPackaging extends AbstractCorePackagingProvider
         return "archetype:generate -DinteractiveMode=false " +
             "-DarchetypeArtifactId=liferay-" + pluginType + "-archetype " +
             "-DarchetypeGroupId=com.liferay.maven.archetypes -DarchetypeVersion=6.2.0-SNAPSHOT " +
-            "-DartifactId=" + artifactId + " -DgroupId=" + groupId + " Dversion=0.1.0-SNAPSHOT";
+            "-DartifactId=" + artifactId + " -DgroupId=" + groupId + " -Dversion=0.1.0-SNAPSHOT";
     }
 
     @Override

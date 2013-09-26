@@ -5,22 +5,39 @@ import com.liferay.cli.shell.CliAvailabilityIndicator;
 import com.liferay.cli.shell.CliCommand;
 import com.liferay.cli.shell.CliOption;
 import com.liferay.cli.shell.CommandMarker;
+import com.liferay.cli.shell.converters.StaticFieldConverter;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * Shell commands for {@link RayOperations} commands.
  *
  * @author Gregory Amerson
  */
-@Component
+@Component( immediate = true )
 @Service
-public class RayCommands implements CommandMarker {
+public class RayCommands implements CommandMarker
+{
 
+    private static final String DEPLOY_COMMAND = "deploy";
     private static final String PROJECT_COMMAND = "project";
     private static final String PLUGIN_CREATE_COMMAND = "plugin create";
+
+    @Reference
+    private StaticFieldConverter staticFieldConverter;
+
+    protected void activate(final ComponentContext context)
+    {
+        staticFieldConverter.add( PluginType.class );
+    }
+
+    protected void deactivate(final ComponentContext context)
+    {
+        staticFieldConverter.remove( PluginType.class );
+    }
 
     @Reference private RayOperations rayOperations;
 
@@ -50,10 +67,16 @@ public class RayCommands implements CommandMarker {
         @CliOption(
             key = { "type" },
             mandatory = true,
-            help = "The type of server to set as target for project" )
+            help = "The type of plugin to create" )
         final PluginType pluginType )
     {
         rayOperations.createPlugin( pluginName, pluginType );
+    }
+
+    @CliCommand( value = DEPLOY_COMMAND, help = "Deploy the focused plugin" )
+    public void deploy()
+    {
+        rayOperations.deploy();
     }
 
     @CliAvailabilityIndicator( PROJECT_COMMAND )
@@ -67,5 +90,12 @@ public class RayCommands implements CommandMarker {
     {
         return rayOperations.isPluginCreateAvailable();
     }
+
+    @CliAvailabilityIndicator( DEPLOY_COMMAND )
+    public boolean isDeployAvailable()
+    {
+        return rayOperations.isDeployAvailable();
+    }
+
 
 }

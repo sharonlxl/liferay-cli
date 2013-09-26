@@ -15,9 +15,15 @@ public class XtermConsole extends AbstractConsole
         this.xtermCmd = xtermCmd;
     }
 
+    @Override
     protected String getExecCommand(String cmd, String argLine)
     {
         return this.xtermCmd + " -ls -T liferay_console -e " + cmd + " " + argLine;
     }
 
+    @Override
+    protected String getExecQuietCommand( String cmd, String argLine )
+    {
+        return cmd + " " + argLine;
+    }
 }

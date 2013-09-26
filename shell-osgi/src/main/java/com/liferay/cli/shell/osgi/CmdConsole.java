@@ -14,4 +14,10 @@ public class CmdConsole extends AbstractConsole
         return "cmd.exe /c start cmd.exe /k " + cmd + " " + argLine;
     }
 
+    @Override
+    protected String getExecQuietCommand( String cmd, String argLine )
+    {
+        return "cmd.exe /c /k " + cmd + " " + argLine;
+    }
+
 }

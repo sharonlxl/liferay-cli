@@ -28,6 +28,26 @@ public abstract class AbstractConsole implements ExternalConsole
         return null;
     }
 
+    @Override
+    public Process executeQuiet( String workingDir, String cmd, String argLine )
+    {
+        Runtime runtime = Runtime.getRuntime();
+
+        try
+        {
+            return runtime.exec( getExecQuietCommand( cmd, argLine ), null, new File( workingDir ) );
+        }
+        catch( IOException e )
+        {
+            // TODO RAY handle this better
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     protected abstract String getExecCommand( String cmd, String argLine );
+
+    protected abstract String getExecQuietCommand( String cmd, String argLine );
 
 }

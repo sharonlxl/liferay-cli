@@ -333,7 +333,7 @@ public abstract class JLineShell extends AbstractShell implements
                     }
                 }
             }
-        }, "Spring Roo JLine Flash Message Manager");
+        }, "Liferay CLI JLine Flash Message Manager");
         t.start();
     }
 
@@ -382,7 +382,7 @@ public abstract class JLineShell extends AbstractShell implements
             if (getExitShellRequest() != null) {
                 // Shutting down, so close our file (we can always reopen it
                 // later if needed)
-                fileLog.write("// Spring Roo " + versionInfo()
+                fileLog.write("// Liferay CLI " + versionInfo()
                         + " log closed at " + df.format(new Date()) + "\n");
                 IOUtils.closeQuietly(fileLog);
                 fileLog = null;

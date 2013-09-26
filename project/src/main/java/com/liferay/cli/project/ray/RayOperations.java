@@ -33,4 +33,10 @@ public interface RayOperations extends ProjectOperations
 
 
     boolean isPluginCreateAvailable();
+
+
+    void deploy();
+
+
+    boolean isDeployAvailable();
 }

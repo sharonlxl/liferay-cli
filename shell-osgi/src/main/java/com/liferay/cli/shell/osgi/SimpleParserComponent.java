@@ -83,7 +83,7 @@ public class SimpleParserComponent extends SimpleParser implements
 
         // Render to screen if required
         if (matches == null) {
-            logger.info("Spring Roo automatic add-on discovery service currently unavailable");
+            logger.info("Liferay CLI automatic add-on discovery service currently unavailable");
         }
         else if (matches == 0) {
             logger.info("addon search --requiresCommand \"" + command

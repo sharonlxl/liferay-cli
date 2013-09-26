@@ -14,6 +14,8 @@ import com.liferay.cli.support.logging.HandlerUtils;
 import com.liferay.cli.support.util.DomUtils;
 import com.liferay.cli.support.util.XmlUtils;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -125,7 +127,7 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
         final Pom rootPom = pomManagementService.getRootPom();
         final JavaPackage rootPackage = new JavaPackage( rootPom.getGroupId() );
         final GAV parentGAV = new GAV( rootPom.getGroupId(), rootPom.getArtifactId(), rootPom.getVersion() );
-        final String rootPath = rootPom.getPath();
+//        final String rootPath = rootPom.getPath();
 
         // check to see if we need to create the plugins module
         Module plugins = rootPom.getModule( "plugins" );
@@ -137,29 +139,49 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
             final String pluginsArtifactId = rootPom.getArtifactId() + "-plugins";
 
             createModule( rootPackage, parentGAV, "plugins", pluginsPackagingProvider, 6, pluginsArtifactId );
+
+            final Pom pluginsPom = pomManagementService.getPomFromModuleName( "plugins" );
+
+            final Document pluginsPomDocument = XmlUtils.readXml( fileManager.getInputStream( pluginsPom.getPath() ) );
+            final Element pluginsPomRoot = pluginsPomDocument.getDocumentElement();
+
+            // add <properties> element
+            final Element pluginsPropertiesElement =
+                DomUtils.createChildIfNotExists( "properties", pluginsPomRoot, pluginsPomDocument );
+
+            // get the liferay version from the server version
+            //TODO RAY this should be available in root pom
+            String liferayVersion =
+                pomManagementService.getPomFromModuleName( "server" ).getProperty( "liferay.version" ).getValue();
+
+            addPropertyElement(
+                "liferay.version", liferayVersion, pluginsPropertiesElement, pluginsPomDocument );
+            addPropertyElement(
+                "liferay.maven.plugin.version", "6.2.0-SNAPSHOT", pluginsPropertiesElement, pluginsPomDocument );
+            addPropertyElement(
+                "liferay.auto.deploy.dir", "../../server/target/deploy/", pluginsPropertiesElement, pluginsPomDocument );
+            addPropertyElement(
+                "liferay.app.server.deploy.dir", "../../server/target/tomcat/webapps", pluginsPropertiesElement,
+                pluginsPomDocument );
+            addPropertyElement(
+                "liferay.app.server.portal.dir", "../../server/target/tomcat/webapps/portal-web/",
+                pluginsPropertiesElement, pluginsPomDocument );
+
+            final String updatedProperties =
+                getDescriptionOfChange(
+                    "updated", Collections.singleton( pluginsPom.getDisplayName() ), "property", "properties" );
+
+            fileManager.createOrUpdateTextFileIfRequired( pluginsPom.getPath(),
+                XmlUtils.nodeToString( pluginsPomDocument ), updatedProperties, false );
         }
 
         final Pom pluginsPom = pomManagementService.getPomFromModuleName( "plugins" );
 
-        final Document pluginsPomDocument = XmlUtils.readXml( fileManager.getInputStream( pluginsPom.getPath() ) );
-        final Element pluginsPomRoot = pluginsPomDocument.getDocumentElement();
-
-        // add <properties> element
-        final Element pluginsPropertiesElement =
-            DomUtils.createChildIfNotExists( "properties", pluginsPomRoot, pluginsPomDocument );
-
-        addPropertyElement(
-            "liferay.maven.plugin.version", "6.2.0-SNAPSHOT", pluginsPropertiesElement, pluginsPomDocument );
-        addPropertyElement(
-            "liferay.auto.deploy.dir", "../../server/target/deploy/", pluginsPropertiesElement, pluginsPomDocument );
-        addPropertyElement(
-            "liferay.app.server.deploy.dir", "../../server/target/tomcat/webapps", pluginsPropertiesElement,
-            pluginsPomDocument );
-        addPropertyElement(
-            "liferay.app.server.portal.dir", "../../server/target/tomcat/webapps/portal-web/",
-            pluginsPropertiesElement, pluginsPomDocument );
+        setModule( pluginsPom );
 
         addPluginModule( pluginsPom, pluginName, pluginType, rootPackage );
+
+        fileManager.commit();
     }
 
     private void addPropertyElement( String elementName, String textContent, Element parentElement, Document document )
@@ -173,10 +195,11 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
         final GAV pluginsGAV = new GAV( pluginsPom.getGroupId(), pluginsPom.getArtifactId(), pluginsPom.getVersion() );
 
         final PackagingProvider pluginPackagingProvider =
-                        packagingProviderRegistry.getPackagingProvider( pluginType.getKey() );
+            packagingProviderRegistry.getPackagingProvider( pluginType.getKey() );
+
         final String pluginArtifactId = getArtifactId( pluginName );
 
-        createModule( rootPackage, pluginsGAV, pluginName, pluginPackagingProvider, 6, pluginArtifactId );
+        createModule( rootPackage, pluginsGAV, pluginArtifactId, pluginPackagingProvider, 6, pluginArtifactId );
     }
 
     @Override
@@ -184,6 +207,29 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
     {
         return isProjectAvailable( getFocusedModuleName() ) &&
             pomManagementService.getRootPom().equals( getFocusedModule() );
+    }
+
+    @Override
+    public void deploy()
+    {
+        // TODO RAY make sure that the deploy directory is available
+
+        try
+        {
+            executeMvnCommand( "-Dmaven.test.skip=true verify liferay:deploy" );
+        }
+        catch( IOException e )
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean isDeployAvailable()
+    {
+        //TODO RAY make sure that the currently focused module is a liferay plugin
+        return true;
     }
 
 }
