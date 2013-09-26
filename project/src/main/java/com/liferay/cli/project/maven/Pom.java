@@ -2,20 +2,6 @@ package com.liferay.cli.project.maven;
 
 import static com.liferay.cli.project.Path.ROOT;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import com.liferay.cli.support.util.CollectionUtils;
-import com.liferay.cli.support.util.FileUtils;
-
 import com.liferay.cli.project.Dependency;
 import com.liferay.cli.project.DependencyScope;
 import com.liferay.cli.project.DependencyType;
@@ -27,10 +13,24 @@ import com.liferay.cli.project.Plugin;
 import com.liferay.cli.project.Property;
 import com.liferay.cli.project.Repository;
 import com.liferay.cli.project.Resource;
+import com.liferay.cli.support.util.CollectionUtils;
+import com.liferay.cli.support.util.FileUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * A Maven project object model (POM).
- * 
+ *
  * @author James Tyrrell
  * @author Andrew Swan
  * @since 1.2.0
@@ -59,7 +59,7 @@ public class Pom {
 
     /**
      * Constructor
-     * 
+     *
      * @param groupId the Maven groupId, explicit or inherited (required)
      * @param artifactId the Maven artifactId (required)
      * @param version the version of the artifact being built (required)
@@ -133,7 +133,7 @@ public class Pom {
 
     /**
      * Returns this module as a Dependency with the given scope
-     * 
+     *
      * @return a non-<code>null</code> instance
      */
     public Dependency asDependency(final DependencyScope scope) {
@@ -155,7 +155,7 @@ public class Pom {
     /**
      * Indicates whether it's valid to add the given {@link Dependency} to this
      * POM.
-     * 
+     *
      * @param newDependency the {@link Dependency} to check (can be
      *            <code>null</code>)
      * @return see above
@@ -170,7 +170,7 @@ public class Pom {
 
     /**
      * Returns the ID of the artifact created by this module or project
-     * 
+     *
      * @return a non-blank ID
      */
     public String getArtifactId() {
@@ -179,7 +179,7 @@ public class Pom {
 
     /**
      * Returns any registered build plugins
-     * 
+     *
      * @return a non-<code>null</code> collection
      */
     public Set<Plugin> getBuildPlugins() {
@@ -189,7 +189,7 @@ public class Pom {
     /**
      * Returns any build plugins with the same groupId and artifactId as the
      * given plugin. This is useful for upgrade cases.
-     * 
+     *
      * @param plugin to locate (required; note the version number is ignored in
      *            comparisons)
      * @return any matching plugins (never returns null, but may return an empty
@@ -216,7 +216,7 @@ public class Pom {
      * the version number. This is useful for upgrade use cases, where it is
      * necessary to remove any dependencies with the same group id, artifact id,
      * and type as the dependency being upgraded to.
-     * 
+     *
      * @param dependency to locate (can be <code>null</code>)
      * @return any matching dependencies (never returns null, but may return an
      *         empty {@link Set})
@@ -237,7 +237,7 @@ public class Pom {
 
     /**
      * Returns the display name of this module of the user project
-     * 
+     *
      * @return a non-blank name
      */
     public String getDisplayName() {
@@ -251,16 +251,29 @@ public class Pom {
     /**
      * Returns the ID of the organisation or group that owns this module or
      * project
-     * 
+     *
      * @return a non-blank ID
      */
     public String getGroupId() {
         return gav.getGroupId();
     }
 
+    public Module getModule( String moduleName )
+    {
+        for( Module module : getModules() )
+        {
+            if( module.getName().equals( moduleName ) )
+            {
+                return module;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Returns the programmatic name of this module of the user project
-     * 
+     *
      * @return an empty string for the root or only module
      */
     public String getModuleName() {
@@ -273,7 +286,7 @@ public class Pom {
 
     /**
      * Returns the display name of this module of the user project
-     * 
+     *
      * @return a non-blank name
      * @deprecated use {@link #getDisplayName()} instead
      */
@@ -292,7 +305,7 @@ public class Pom {
 
     /**
      * Returns this descriptor's canonical path on the file system
-     * 
+     *
      * @return a valid canonical path
      */
     public String getPath() {
@@ -302,7 +315,7 @@ public class Pom {
     /**
      * Returns the canonical path of the given {@link Path} within this module,
      * plus a trailing separator if found
-     * 
+     *
      * @param path the path for which to get the canonical location (required)
      * @return <code>null</code> if this module has no such path
      */
@@ -317,7 +330,7 @@ public class Pom {
     /**
      * Returns the {@link PhysicalPath} for the given {@link Path} of this
      * module
-     * 
+     *
      * @param path the sub-path for which to return the {@link PhysicalPath}
      * @return <code>null</code> if this module has no such sub-path
      */
@@ -341,7 +354,7 @@ public class Pom {
      * Locates any properties which match the presented property, excluding the
      * value. This is useful for upgrade use cases, where it is necessary to
      * locate any properties with the name so that they can be removed.
-     * 
+     *
      * @param property to locate (required; note the value is ignored in
      *            comparisons)
      * @return any matching properties (never returns null, but may return an
@@ -361,7 +374,7 @@ public class Pom {
     /**
      * Locates the first occurrence of a property for a given name and returns
      * it.
-     * 
+     *
      * @param name the property name (required)
      * @return the property if found otherwise null
      */
@@ -386,7 +399,7 @@ public class Pom {
     /**
      * Returns the canonical path of this module's root directory, plus a
      * trailing separator
-     * 
+     *
      * @return a valid canonical path
      */
     public String getRoot() {
@@ -403,7 +416,7 @@ public class Pom {
 
     /**
      * Returns the version number of this module or project
-     * 
+     *
      * @return a non-blank version number
      */
     public String getVersion() {
@@ -413,7 +426,7 @@ public class Pom {
     /**
      * Indicates whether this {@link Pom} has the given {@link Dependency},
      * ignoring the version number.
-     * 
+     *
      * @param dependency the {@link Dependency} to check for (can be
      *            <code>null</code>)
      * @return <code>false</code> if a <code>null</code> dependency is given
@@ -427,7 +440,7 @@ public class Pom {
      * Indicates whether all of the given dependencies are registered, by
      * calling {@link #isDependencyRegistered(Dependency)} for each one,
      * ignoring any <code>null</code> elements.
-     * 
+     *
      * @param dependencies the dependencies to check (can be <code>null</code>
      *            or contain <code>null</code> elements)
      * @return true if a <code>null</code> or empty collection is given
@@ -448,7 +461,7 @@ public class Pom {
      * Indicates whether all the given plugin repositories are registered, by
      * calling {@link #isPluginRepositoryRegistered(Repository)} for each one,
      * ignoring any <code>null</code> elements.
-     * 
+     *
      * @param repositories the plugin repositories to check (can be
      *            <code>null</code>)
      * @return <code>true</code> if a <code>null</code> collection is given
@@ -469,7 +482,7 @@ public class Pom {
     /**
      * Indicates whether all of the given plugins are registered, based on their
      * groupId, artifactId, and version.
-     * 
+     *
      * @param plugins the plugins to check (required)
      * @return <code>false</code> if any of them are not registered
      */
@@ -488,7 +501,7 @@ public class Pom {
      * Indicates whether all the given repositories are registered. Equivalent
      * to calling {@link #isRepositoryRegistered(Repository)} for each one,
      * ignoring any <code>null</code> elements.
-     * 
+     *
      * @param repositories the repositories to check (can be <code>null</code>)
      * @return true if a <code>null</code> collection is given
      */
@@ -507,7 +520,7 @@ public class Pom {
     /**
      * Indicates whether any of the given dependencies are registered, by
      * calling {@link #isDependencyRegistered(Dependency)} for each one.
-     * 
+     *
      * @param dependencies the dependencies to check (can be <code>null</code>)
      * @return see above
      */
@@ -526,7 +539,7 @@ public class Pom {
     /**
      * Indicates whether any of the given plugins are registered, by calling
      * {@link #isBuildPluginRegistered(Plugin)} for each one.
-     * 
+     *
      * @param plugins the plugins to check (required)
      * @return whether any of the plugins are currently registered or not
      */
@@ -544,7 +557,7 @@ public class Pom {
     /**
      * Indicates whether the given build plugin is registered, based on its
      * groupId, artifactId, and version.
-     * 
+     *
      * @param plugin to check (required)
      * @return whether the build plugin is currently registered or not
      * @deprecated use {@link #isPluginRegistered(GAV)} instead
@@ -557,7 +570,7 @@ public class Pom {
     /**
      * Indicates whether the given dependency is registered, by checking the
      * result of {@link Dependency#equals(Object)}.
-     * 
+     *
      * @param dependency the dependency to check (can be <code>null</code>)
      * @return <code>false</code> if a <code>null</code> dependency is given
      */
@@ -567,7 +580,7 @@ public class Pom {
 
     /**
      * Indicates whether the given filter is registered.
-     * 
+     *
      * @param filter to check (required)
      * @return whether the filter is currently registered or not
      */
@@ -578,7 +591,7 @@ public class Pom {
 
     /**
      * Indicates whether a plugin with the given coordinates is registered
-     * 
+     *
      * @param coordinates the coordinates to match upon; can be
      *            <code>null</code>
      * @return false if <code>null</code> coordinates are given
@@ -594,7 +607,7 @@ public class Pom {
 
     /**
      * Indicates whether the given plugin repository is registered.
-     * 
+     *
      * @param repository repository to check (can be <code>null</code>)
      * @return <code>false</code> if a <code>null</code> repository is given
      */
@@ -604,7 +617,7 @@ public class Pom {
 
     /**
      * Indicates whether the given build property is registered.
-     * 
+     *
      * @param property to check (required)
      * @return whether the property is currently registered or not
      */
@@ -615,7 +628,7 @@ public class Pom {
 
     /**
      * Indicates whether the given repository is registered.
-     * 
+     *
      * @param repository to check (can be <code>null</code>)
      * @return <code>false</code> if a <code>null</code> repository is given
      */
@@ -625,7 +638,7 @@ public class Pom {
 
     /**
      * Indicates whether the given resource is registered.
-     * 
+     *
      * @param resource to check (required)
      * @return whether the resource is currently registered or not
      */

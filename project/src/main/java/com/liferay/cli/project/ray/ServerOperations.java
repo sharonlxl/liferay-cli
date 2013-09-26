@@ -1,4 +1,4 @@
-package com.liferay.cli.project.server;
+package com.liferay.cli.project.ray;
 
 import com.liferay.cli.project.ProjectOperations;
 
@@ -20,6 +20,8 @@ public interface ServerOperations extends ProjectOperations
     void serverSetup(ServerType serverType, ServerVersion serverVersion, ServerEdition serverEdition  );
 
     void serverRun();
+
+    void serverStop();
 
     boolean isServerSetupAvailable();
 

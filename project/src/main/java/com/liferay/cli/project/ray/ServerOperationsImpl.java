@@ -1,5 +1,5 @@
 
-package com.liferay.cli.project.server;
+package com.liferay.cli.project.ray;
 
 import com.liferay.cli.model.JavaPackage;
 import com.liferay.cli.project.Dependency;
@@ -198,6 +198,22 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         ExternalConsoleProvider externalShellProvider = externalShellProviderRegistry.getExternalShellProvider();
 
         externalShellProvider.getConsole().execute(workingDir, "mvn", mavenCommandArgs );
+    }
+
+    @Override
+    public void serverStop()
+    {
+        final Pom serverPom = pomManagementService.getPomFromModuleName( "server" );
+        final String workingDir = new File( serverPom.getPath() ).getParent(); // TODO RAY handle unexpected results better
+
+        final ExternalConsoleProvider externalShellProvider = externalShellProviderRegistry.getExternalShellProvider();
+
+        externalShellProvider.getConsole().execute(workingDir, "mvn", getServerStopMavenCommand() );
+    }
+
+    private String getServerStopMavenCommand()
+    {
+        return null;
     }
 
     private String getServerRunMavenCommand( String logfixArtifactId, String serverArtifactId )

@@ -1,6 +1,7 @@
-package com.liferay.cli.project;
+package com.liferay.cli.project.ray;
 
 import com.liferay.cli.model.JavaPackage;
+import com.liferay.cli.project.ProjectOperations;
 
 /**
  * Provides Liferay project operations.
@@ -26,4 +27,10 @@ public interface RayOperations extends ProjectOperations
      * @return see above
      */
     boolean isCreateProjectAvailable();
+
+
+    void createPlugin( String pluginName, PluginType pluginType );
+
+
+    boolean isPluginCreateAvailable();
 }

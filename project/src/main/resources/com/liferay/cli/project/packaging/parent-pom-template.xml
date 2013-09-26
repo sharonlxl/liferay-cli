@@ -16,6 +16,7 @@
         <java.version>JAVA_VERSION</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ray.version>1.0.0-SNAPSHOT</ray.version>
+        <liferay.version>TO_BE_CHANGED_BY_LISTENER</liferay.version>
     </properties>
 
     <build>

@@ -1,5 +1,5 @@
 
-package com.liferay.cli.project.server;
+package com.liferay.cli.project.ray;
 
 import com.liferay.cli.support.KeyType;
 

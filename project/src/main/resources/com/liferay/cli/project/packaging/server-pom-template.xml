@@ -12,10 +12,6 @@
     <version>0.1.0-SNAPSHOT</version>
     <name>TO_BE_CHANGED_BY_LISTENER</name>
 
-    <properties>
-        <liferay.version>TO_BE_CHANGED_BY_LISTENER</liferay.version>
-    </properties>
-
     <build>
         <pluginManagement>
             <plugins>

@@ -1,5 +1,5 @@
 
-package com.liferay.cli.project.server;
+package com.liferay.cli.project.ray;
 
 import com.liferay.cli.shell.CliAvailabilityIndicator;
 import com.liferay.cli.shell.CliCommand;
@@ -23,6 +23,7 @@ public class ServerCommands implements CommandMarker
 {
     private static final String SERVER_SETUP_COMMAND = "server setup";
     private static final String SERVER_RUN_COMMAND = "server run";
+    private static final String SERVER_STOP_COMMAND = "server stop";
 
     @Reference
     private StaticFieldConverter staticFieldConverter;
@@ -69,6 +70,12 @@ public class ServerCommands implements CommandMarker
     public void serverRun()
     {
         serverOperations.serverRun();
+    }
+
+    @CliCommand( value = SERVER_STOP_COMMAND, help = "Stops any running Liferay server" )
+    public void serverStop()
+    {
+        serverOperations.serverStop();
     }
 
     @CliAvailabilityIndicator( SERVER_SETUP_COMMAND )
