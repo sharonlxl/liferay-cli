@@ -19,11 +19,11 @@ public interface ServerOperations extends ProjectOperations
      */
     void serverSetup(ServerType serverType, ServerVersion serverVersion, ServerEdition serverEdition  );
 
-    void serverRun();
+    void serverStart();
 
     void serverStop();
 
     boolean isServerSetupAvailable();
 
-    boolean isServerRunAvailable();
+    boolean isServerStartAvailable();
 }

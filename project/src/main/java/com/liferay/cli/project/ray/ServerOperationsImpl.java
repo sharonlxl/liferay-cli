@@ -174,7 +174,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
     }
 
     @Override
-    public void serverRun()
+    public void serverStart()
     {
         final Pom serverPom = pomManagementService.getPomFromModuleName( "server" );
         final String workingDir = new File( serverPom.getPath() ).getParent(); // TODO RAY handle unexpected results better
@@ -193,7 +193,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
             }
         }
 
-        final String mavenCommandArgs = getServerRunMavenCommand( logfixArtifactId, serverArtifactId );
+        final String mavenCommandArgs = getServerStartMavenCommand( logfixArtifactId, serverArtifactId );
 
         ExternalConsoleProvider externalShellProvider = externalShellProviderRegistry.getExternalShellProvider();
 
@@ -217,7 +217,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         return "-Dmaven.test.skip=true liferay-tomcat7:shutdown-liferay";
     }
 
-    private String getServerRunMavenCommand( String logfixArtifactId, String serverArtifactId )
+    private String getServerStartMavenCommand( String logfixArtifactId, String serverArtifactId )
     {
         StringBuffer sb = new StringBuffer();
 
@@ -231,7 +231,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
     }
 
     @Override
-    public boolean isServerRunAvailable()
+    public boolean isServerStartAvailable()
     {
         return externalShellProviderRegistry.getExternalShellProvider() != null && checkValidServerSetup();
     }

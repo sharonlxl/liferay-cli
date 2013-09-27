@@ -22,7 +22,7 @@ import org.osgi.service.component.ComponentContext;
 public class ServerCommands implements CommandMarker
 {
     private static final String SERVER_SETUP_COMMAND = "server setup";
-    private static final String SERVER_RUN_COMMAND = "server run";
+    private static final String SERVER_START_COMMAND = "server start";
     private static final String SERVER_STOP_COMMAND = "server stop";
 
     @Reference
@@ -66,13 +66,13 @@ public class ServerCommands implements CommandMarker
         serverOperations.serverSetup( serverType, serverVersion, serverEdition );
     }
 
-    @CliCommand( value = SERVER_RUN_COMMAND, help = "Runs configured Liferay server" )
-    public void serverRun()
+    @CliCommand( value = SERVER_START_COMMAND, help = "Starts Liferay portal as embedded server" )
+    public void serverStart()
     {
-        serverOperations.serverRun();
+        serverOperations.serverStart();
     }
 
-    @CliCommand( value = SERVER_STOP_COMMAND, help = "Stops any running Liferay server" )
+    @CliCommand( value = SERVER_STOP_COMMAND, help = "Stops the embedded Liferay server" )
     public void serverStop()
     {
         serverOperations.serverStop();
@@ -84,10 +84,10 @@ public class ServerCommands implements CommandMarker
         return serverOperations.isServerSetupAvailable();
     }
 
-    @CliAvailabilityIndicator( SERVER_RUN_COMMAND )
-    public boolean isServerRunAvailable()
+    @CliAvailabilityIndicator( SERVER_START_COMMAND )
+    public boolean isServerStartAvailable()
     {
-        return serverOperations.isServerRunAvailable();
+        return serverOperations.isServerStartAvailable();
     }
 
 }
