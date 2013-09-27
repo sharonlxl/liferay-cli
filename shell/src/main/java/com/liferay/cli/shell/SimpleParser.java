@@ -1080,9 +1080,9 @@ public class SimpleParser implements Parser {
                         }
                     }
 
-                    for (final String value : cmd.value()) {
-                        if( isModeAllowed( cmd ))
-                        {
+                    if( isModeAllowed( cmd ) )
+                    {
+                        for (final String value : cmd.value()) {
                             final String remainingBuffer = isMatch(buffer, value,
                                 strictMatching);
                             if (remainingBuffer != null) {
@@ -1199,7 +1199,7 @@ public class SimpleParser implements Parser {
             for (final MethodTarget mt : matchingTargets) {
                 final CliCommand cmd = mt.getMethod().getAnnotation(
                         CliCommand.class);
-                if (cmd != null) {
+                if (cmd != null && (!cmd.system())) {
                     for (final String value : cmd.value()) {
                         if ("".equals(cmd.help())) {
                             result.add("* " + value);
