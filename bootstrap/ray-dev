@@ -11,10 +11,10 @@ while [ -h "$PRG" ]; do
         PRG=`dirname "$PRG"`/"$link"
     fi
 done
-#RAY_HOME=`dirname "$PRG"`
+RAY_HOME=`dirname "$PRG"`
 
 # Absolute path
-#RAY_HOME=`cd "$RAY_HOME/.." ; pwd`
+RAY_HOME=`cd "$RAY_HOME/.." ; pwd`
 echo "Resolved RAY_HOME: $RAY_HOME"
 
 mkdir -p "$RAY_HOME"/bootstrap/target/osgi/bin
@@ -34,8 +34,8 @@ mv "$RAY_HOME"/bootstrap/target/osgi/bundle/com.liferay.cli.bootstrap-*.jar "$RA
 mv "$RAY_HOME"/bootstrap/target/osgi/bundle/org.apache.felix.framework-*.jar "$RAY_HOME"/bootstrap/target/osgi/bin
 
 # Build a classpath containing our two magical startup JARs (we look for " /" as per ray-905)
-RAY_CP=`echo "$RAY_HOME"/bootstrap/target/osgi/bin/*.jar | sed 's/ D:\//;D:\//g'`
-echo RAY_CP: $RAY_CP
+RAY_CP=`echo "$RAY_HOME"/bootstrap/target/osgi/bin/*.jar | sed 's/ \//:\//g'`
+# echo RAY_CP: $RAY_CP
 
 # Store file locations in variables to facilitate Cygwin conversion if needed
 
@@ -82,7 +82,6 @@ PAUSE=
 METADATA_TRACE=
 #METADATA_TRACE="-Dray.metadata.trace=true"
 ANSI="-Dray.console.ansi=true"
-echo java $PAUSE $DEBUG $METADATA_TRACE $ANSI -Dis.apple.terminal=$APPLE_TERMINAL $RAY_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Dray.args=\"$*\" -DdevelopmentMode=true -Dorg.osgi.framework.storage=\"$RAY_OSGI_FRAMEWORK_STORAGE\" -Dfelix.auto.deploy.dir=\"$RAY_AUTO_DEPLOY_DIRECTORY\" -Dfelix.config.properties=\"file:$RAY_CONFIG_FILE_PROPERTIES\" -cp \"$RAY_CP\" com.liferay.cli.bootstrap.Main
-java $PAUSE $DEBUG $METADATA_TRACE $ANSI -Dis.apple.terminal=$APPLE_TERMINAL $RAY_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Dray.args=\"$*\" -DdevelopmentMode=true -Dorg.osgi.framework.storage=\"$RAY_OSGI_FRAMEWORK_STORAGE\" -Dfelix.auto.deploy.dir=\"$RAY_AUTO_DEPLOY_DIRECTORY\" -Dfelix.config.properties=\"file:$RAY_CONFIG_FILE_PROPERTIES\" -cp \"$RAY_CP\" com.liferay.cli.bootstrap.Main
+java $PAUSE $DEBUG $METADATA_TRACE $ANSI -Dis.apple.terminal=$APPLE_TERMINAL $RAY_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Dray.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$RAY_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$RAY_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$RAY_CONFIG_FILE_PROPERTIES" -cp "$RAY_CP" com.liferay.cli.bootstrap.Main
 EXITED=$?
 echo ray exited with code $EXITED
