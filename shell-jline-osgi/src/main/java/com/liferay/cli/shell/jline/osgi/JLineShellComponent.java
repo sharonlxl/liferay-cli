@@ -1,5 +1,10 @@
 package com.liferay.cli.shell.jline.osgi;
 
+import com.liferay.cli.shell.ExecutionStrategy;
+import com.liferay.cli.shell.Parser;
+import com.liferay.cli.shell.jline.JLineShell;
+import com.liferay.cli.support.osgi.OSGiUtils;
+
 import java.net.URL;
 import java.util.Collection;
 
@@ -8,14 +13,9 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
-import com.liferay.cli.shell.ExecutionStrategy;
-import com.liferay.cli.shell.Parser;
-import com.liferay.cli.shell.jline.JLineShell;
-import com.liferay.cli.support.osgi.OSGiUtils;
-
 /**
  * OSGi component launcher for {@link JLineShell}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -31,7 +31,7 @@ public class JLineShellComponent extends JLineShell {
 
     protected void activate(final ComponentContext context) {
         this.context = context;
-        final Thread thread = new Thread(this, "Liferay CLI JLine Shell");
+        final Thread thread = new Thread(this, "Ray JLine Shell");
         thread.start();
     }
 

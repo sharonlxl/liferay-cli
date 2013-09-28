@@ -90,7 +90,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     @Reference MetadataService metadataService;
     @Reference protected PathResolver pathResolver;
 
-    @Reference protected PomManagementService pomManagementService;
+    @Reference protected PomManagementService pomService;
     @Reference protected Shell shell;
 
     public void addBuildPlugin(final String moduleName, final Plugin plugin) {
@@ -526,12 +526,12 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
 
     public String getFocusedModuleName() {
-        return pomManagementService.getFocusedModuleName();
+        return pomService.getFocusedModuleName();
     }
 
     public String getRootName()
     {
-        Pom rootPom = pomManagementService.getRootPom();
+        Pom rootPom = pomService.getRootPom();
 
         return rootPom != null ? rootPom.getArtifactId() : null;
     }
@@ -549,11 +549,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
 
     public Pom getModuleForFileIdentifier(final String fileIdentifier) {
-        return pomManagementService.getModuleForFileIdentifier(fileIdentifier);
+        return pomService.getModuleForFileIdentifier(fileIdentifier);
     }
 
     public Collection<String> getModuleNames() {
-        return pomManagementService.getModuleNames();
+        return pomService.getModuleNames();
     }
 
     public PathResolver getPathResolver() {
@@ -566,7 +566,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
 
     public Collection<Pom> getPoms() {
-        return pomManagementService.getPoms();
+        return pomService.getPoms();
     }
 
     private String getPomDependenciesUpdateMessage(
@@ -1057,11 +1057,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     public void setModule(final Pom module) {
         // Update window title with project name
-        shell.flash(Level.FINE,
-                "Spring Roo: " + getTopLevelPackage(module.getModuleName()),
-                Shell.WINDOW_TITLE_SLOT);
+        shell.flash(Level.FINE, "Ray: " + getTopLevelPackage(module.getModuleName()), Shell.WINDOW_TITLE_SLOT);
         shell.setPromptPath(module.getModuleName());
-        pomManagementService.setFocusedModule(module);
+        pomService.setFocusedModule(module);
     }
 
     protected void unbindFeature(final Feature feature) {

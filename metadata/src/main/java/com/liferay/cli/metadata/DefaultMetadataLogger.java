@@ -98,7 +98,7 @@ public class DefaultMetadataLogger implements MetadataLogger {
             }
         }
         try {
-            fileLog.write(line + "\n"); // Unix line endings only from Roo
+            fileLog.write(line + "\n"); // Unix line endings only from Ray
             fileLog.flush(); // So tail -f will show it's working
         }
         catch (final IOException ignoreIt) {

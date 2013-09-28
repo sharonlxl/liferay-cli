@@ -22,7 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -49,7 +52,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
     @Override
     public void serverSetup( final ServerType serverType, final ServerVersion serverVersion, final ServerEdition serverEdition )
     {
-        final Pom rootPom = pomManagementService.getRootPom();
+        final Pom rootPom = pomService.getRootPom();
         final JavaPackage rootTopLevelPackage = new JavaPackage( rootPom.getGroupId() );
         final GAV parentGAV = new GAV( rootPom.getGroupId(), rootPom.getArtifactId(), rootPom.getVersion() );
         final String rootPath = rootPom.getPath();
@@ -76,16 +79,16 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
                 "updated", Collections.singleton( rootPom.getDisplayName() ), "property", "properties" );
 
         fileManager.createOrUpdateTextFileIfRequired(
-            pomManagementService.getRootPom().getPath(), XmlUtils.nodeToString( rootPomDocument ), updatedProperties, false );
+            pomService.getRootPom().getPath(), XmlUtils.nodeToString( rootPomDocument ), updatedProperties, false );
 
         // add <modules>
         addLogfixModule( rootPom, rootTopLevelPackage, parentGAV );
 
-        pomManagementService.setFocusedModule( rootPom );
+        pomService.setFocusedModule( rootPom );
 
         addServerModule( rootPom, rootTopLevelPackage, parentGAV, serverVersion );
 
-        pomManagementService.setFocusedModule( rootPom );
+        pomService.setFocusedModule( rootPom );
 
         fileManager.commit();
     }
@@ -99,7 +102,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
 
         createModule( rootTopLevelPackage, parentGAV, serverModuleName, serverPackagingProvider, 6, serverArtifactId );
 
-        final Pom serverPom = pomManagementService.getPomFromModuleName( serverModuleName );
+        final Pom serverPom = pomService.getPomFromModuleName( serverModuleName );
 
         final Document serverPomDocument = XmlUtils.readXml( fileManager.getInputStream( serverPom.getPath() ) );
         final Element serverPomRoot = serverPomDocument.getDocumentElement();
@@ -176,7 +179,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
     @Override
     public void serverStart()
     {
-        final Pom serverPom = pomManagementService.getPomFromModuleName( "server" );
+        final Pom serverPom = pomService.getPomFromModuleName( "server" );
         final String workingDir = new File( serverPom.getPath() ).getParent(); // TODO RAY handle unexpected results better
 
         final String serverArtifactId = serverPom.getArtifactId();
@@ -186,24 +189,56 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         {
             if( module.getName().endsWith( "logfix" ) )
             {
-                Pom logfixPom = pomManagementService.getPomFromModuleName( "logfix" );
+                Pom logfixPom = pomService.getPomFromModuleName( "logfix" );
                 logfixArtifactId = logfixPom.getArtifactId();
 
                 break;
             }
         }
 
-        final String mavenCommandArgs = getServerStartMavenCommand( logfixArtifactId, serverArtifactId );
 
-        ExternalConsoleProvider externalShellProvider = externalShellProviderRegistry.getExternalShellProvider();
+        final List<String> pluginArtifactIds = new ArrayList<String>();
 
-        externalShellProvider.getConsole().execute(workingDir, "mvn", mavenCommandArgs );
+        final Pom pluginsPom = pomService.getPomFromModuleName( "plugins" );
+
+        if( pluginsPom != null )
+        {
+            for( Module module : pluginsPom.getModules() )
+            {
+                Pom pluginPom = pomService.getPomFromModuleName( "plugins\\" + module.getName() );
+
+                final String pluginArtifactId = pluginPom.getArtifactId();
+
+                if( pluginPom != null )
+                {
+                    pluginArtifactIds.add( pluginArtifactId );
+                }
+
+                // lets build the plugin so its /target/outputDirectory will be created for embedded tomcat to add
+                pomService.setFocusedModule( pluginPom );
+
+                try
+                {
+                    executeMvnCommand( "-Dmaven.test.skip=true clean verify liferay:deploy" );
+                }
+                catch( IOException e )
+                {
+                    LOGGER.log( Level.WARNING, "Problem building plugin " + pluginArtifactId, e );
+                }
+            }
+
+            pomService.setFocusedModule( serverPom );
+        }
+
+        final String mavenCommandArgs = getServerStartMavenCommand( logfixArtifactId, pluginArtifactIds, serverArtifactId );
+
+        externalShellProviderRegistry.getExternalShellProvider().getConsole().execute( workingDir, "mvn", mavenCommandArgs );
     }
 
     @Override
     public void serverStop()
     {
-        final Pom serverPom = pomManagementService.getPomFromModuleName( "server" );
+        final Pom serverPom = pomService.getPomFromModuleName( "server" );
         final String workingDir = new File( serverPom.getPath() ).getParent(); // TODO RAY handle unexpected results better
 
         final ExternalConsoleProvider externalShellProvider = externalShellProviderRegistry.getExternalShellProvider();
@@ -217,12 +252,20 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         return "-Dmaven.test.skip=true liferay-tomcat7:shutdown-liferay";
     }
 
-    private String getServerStartMavenCommand( String logfixArtifactId, String serverArtifactId )
+    private String getServerStartMavenCommand( String logfixArtifactId, List<String> pluginArtifactIds, String serverArtifactId )
     {
         StringBuffer sb = new StringBuffer();
 
         sb.append( "-Dmaven.test.skip=true verify liferay-tomcat7:run-liferay -pl :");
         sb.append( logfixArtifactId );
+
+        // TODO RAY should be able  to build plugins just before launching the server.
+//        for( String pluginArtifactId : pluginArtifactIds )
+//        {
+//            sb.append( ",:" );
+//            sb.append( pluginArtifactId );
+//        }
+
         sb.append( ",:" );
         sb.append( serverArtifactId );
         sb.append( " -am" );
@@ -261,7 +304,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
 
     public String getProjectRoot()
     {
-        return pathResolver.getRoot( Path.ROOT.getModulePathId( pomManagementService.getFocusedModuleName() ) );
+        return pathResolver.getRoot( Path.ROOT.getModulePathId( pomService.getFocusedModuleName() ) );
     }
 
     public boolean isServerSetupAvailable()

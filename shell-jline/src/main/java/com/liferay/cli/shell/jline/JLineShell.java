@@ -333,7 +333,7 @@ public abstract class JLineShell extends AbstractShell implements
                     }
                 }
             }
-        }, "Liferay CLI JLine Flash Message Manager");
+        }, "Ray JLine Flash Message Manager");
         t.start();
     }
 
@@ -382,7 +382,7 @@ public abstract class JLineShell extends AbstractShell implements
             if (getExitShellRequest() != null) {
                 // Shutting down, so close our file (we can always reopen it
                 // later if needed)
-                fileLog.write("// Liferay CLI " + versionInfo()
+                fileLog.write("// Ray " + versionInfo()
                         + " log closed at " + df.format(new Date()) + "\n");
                 IOUtils.closeQuietly(fileLog);
                 fileLog = null;
@@ -397,7 +397,7 @@ public abstract class JLineShell extends AbstractShell implements
             fileLog = new FileWriter("log.ray", true);
             // First write, so let's record the date and time of the first user
             // command
-            fileLog.write("// Liferay CLI " + versionInfo() + " log opened at "
+            fileLog.write("// Ray " + versionInfo() + " log opened at "
                     + df.format(new Date()) + "\n");
             fileLog.flush();
         }
@@ -498,10 +498,10 @@ public abstract class JLineShell extends AbstractShell implements
 
         logger.info(version(null));
 
-        flash(Level.FINE, "Liferay CLI" + versionInfo(),
+        flash(Level.FINE, "Ray" + versionInfo(),
                 Shell.WINDOW_TITLE_SLOT);
 
-        logger.info("Welcome to Liferay CLI. For assistance press "
+        logger.info("Welcome to Ray. For assistance press "
                 + completionKeys + " or type \"hint\" then hit ENTER.");
 
 

@@ -101,7 +101,7 @@ public class MavenOperationsImplTest {
         projectOperations.fileManager = mockFileManager;
         projectOperations.metadataService = mockMetadataService;
         projectOperations.pathResolver = mockPathResolver;
-        projectOperations.pomManagementService = mockPomManagementService;
+        projectOperations.pomService = mockPomManagementService;
     }
 
     @Test

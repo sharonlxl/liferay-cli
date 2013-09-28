@@ -195,7 +195,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
                 topLevelPackage, artifactId, getJavaVersion(majorJavaVersion),
                 parentPom, moduleName, this);
         updateParentModulePom(moduleName);
-        setModule(pomManagementService.getPomFromPath(pathToNewPom));
+        setModule(pomService.getPomFromPath(pathToNewPom));
     }
 
     private Element createModulesElementIfNecessary(final Document pomDocument,
@@ -278,7 +278,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
 
     public String getProjectRoot() {
         return pathResolver.getRoot(Path.ROOT
-                .getModulePathId(pomManagementService.getFocusedModuleName()));
+                .getModulePathId(pomService.getFocusedModuleName()));
     }
 
     public boolean isCreateModuleAvailable() {
@@ -301,7 +301,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
     }
 
     private void updateParentModulePom(final String moduleName) {
-        final String parentPomPath = pomManagementService.getFocusedModule()
+        final String parentPomPath = pomService.getFocusedModule()
                 .getPath();
         final Document parentPomDocument = XmlUtils.readXml(fileManager
                 .getInputStream(parentPomPath));

@@ -1,5 +1,12 @@
 package com.liferay.cli.project.ray;
 
+import static com.liferay.cli.file.monitor.event.FileOperation.CREATED;
+import static com.liferay.cli.file.monitor.event.FileOperation.DELETED;
+import static com.liferay.cli.file.monitor.event.FileOperation.RENAMED;
+import static com.liferay.cli.file.monitor.event.FileOperation.UPDATED;
+
+import com.liferay.cli.file.monitor.NotifiableFileMonitorService;
+import com.liferay.cli.file.monitor.event.FileOperation;
 import com.liferay.cli.model.JavaPackage;
 import com.liferay.cli.process.manager.ProcessManager;
 import com.liferay.cli.project.GAV;
@@ -10,13 +17,11 @@ import com.liferay.cli.project.maven.Pom;
 import com.liferay.cli.project.packaging.PackagingProvider;
 import com.liferay.cli.project.packaging.PluginsPackaging;
 import com.liferay.cli.project.packaging.PomPackaging;
-import com.liferay.cli.support.logging.HandlerUtils;
 import com.liferay.cli.support.util.DomUtils;
 import com.liferay.cli.support.util.XmlUtils;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -35,10 +40,15 @@ import org.w3c.dom.Element;
 @Service
 public class RayOperationsImpl extends MavenOperationsImpl implements RayOperations
 {
-    private static final Logger LOGGER = HandlerUtils.getLogger( RayOperationsImpl.class );
+
+
+    private static final FileOperation[] MONITORED_OPERATIONS = { CREATED, RENAMED, UPDATED, DELETED };
 
     @Reference
     private ProcessManager processManager;
+
+    @Reference
+    private NotifiableFileMonitorService fileMonitorService;
 
     public void createProject( final String projectName, final JavaPackage topLevelPackage )
     {
@@ -99,7 +109,7 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
 
     public String getProjectRoot() {
         return pathResolver.getRoot(Path.ROOT
-                .getModulePathId(pomManagementService.getFocusedModuleName()));
+                .getModulePathId(pomService.getFocusedModuleName()));
     }
 
     public boolean isCreateModuleAvailable() {
@@ -124,7 +134,7 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
     @Override
     public void createPlugin( String pluginName, PluginType pluginType )
     {
-        final Pom rootPom = pomManagementService.getRootPom();
+        final Pom rootPom = pomService.getRootPom();
         final JavaPackage rootPackage = new JavaPackage( rootPom.getGroupId() );
         final GAV parentGAV = new GAV( rootPom.getGroupId(), rootPom.getArtifactId(), rootPom.getVersion() );
 //        final String rootPath = rootPom.getPath();
@@ -140,7 +150,7 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
 
             createModule( rootPackage, parentGAV, "plugins", pluginsPackagingProvider, 6, pluginsArtifactId );
 
-            final Pom pluginsPom = pomManagementService.getPomFromModuleName( "plugins" );
+            final Pom pluginsPom = pomService.getPomFromModuleName( "plugins" );
 
             final Document pluginsPomDocument = XmlUtils.readXml( fileManager.getInputStream( pluginsPom.getPath() ) );
             final Element pluginsPomRoot = pluginsPomDocument.getDocumentElement();
@@ -152,7 +162,7 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
             // get the liferay version from the server version
             //TODO RAY this should be available in root pom
             String liferayVersion =
-                pomManagementService.getPomFromModuleName( "server" ).getProperty( "liferay.version" ).getValue();
+                pomService.getPomFromModuleName( "server" ).getProperty( "liferay.version" ).getValue();
 
             addPropertyElement(
                 "liferay.version", liferayVersion, pluginsPropertiesElement, pluginsPomDocument );
@@ -175,7 +185,7 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
                 XmlUtils.nodeToString( pluginsPomDocument ), updatedProperties, false );
         }
 
-        final Pom pluginsPom = pomManagementService.getPomFromModuleName( "plugins" );
+        final Pom pluginsPom = pomService.getPomFromModuleName( "plugins" );
 
         setModule( pluginsPom );
 
@@ -206,7 +216,7 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
     public boolean isPluginCreateAvailable()
     {
         return isProjectAvailable( getFocusedModuleName() ) &&
-            pomManagementService.getRootPom().equals( getFocusedModule() );
+            pomService.getRootPom().equals( getFocusedModule() );
     }
 
     @Override
@@ -223,6 +233,13 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+//        File pluginSrcDir = new File( new File( pomManagementService.getFocusedModule().getPath() ).getParent(), "src" );
+
+//        if( pluginSrcDir.exists() )
+//        {
+//            fileMonitorService.add( new DirectoryMonitoringRequest( pluginSrcDir, true, MONITORED_OPERATIONS ) );
+//        }
     }
 
     @Override
