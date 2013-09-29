@@ -112,4 +112,15 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
      * @param tailor the tailor implementation
      */
     void setTailor(Tailor tailor);
+
+    /**
+     * Changes the "working directory" of the current shell instance.
+     * @param workingDir
+     */
+    void setWorkingDir( String workingDir );
+
+    /**
+     * @return return the 'working directory' path of the current shell instance
+     */
+    String getWorkingDir();
 }

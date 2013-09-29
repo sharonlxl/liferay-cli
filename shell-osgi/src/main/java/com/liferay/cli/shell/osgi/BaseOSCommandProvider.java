@@ -1,5 +1,6 @@
 package com.liferay.cli.shell.osgi;
 
+import com.liferay.cli.shell.Shell;
 import com.liferay.cli.support.logging.HandlerUtils;
 
 import java.io.File;
@@ -11,17 +12,40 @@ import java.util.logging.Logger;
 
 /**
  * @author Sharon Li
+ * @author Gregory Amerson
  */
 public abstract class BaseOSCommandProvider implements OSCommandProvider
 {
     private static final Logger LOGGER = HandlerUtils.getLogger( BaseOSCommandProvider.class );
 
-    protected void execute( String command, String argLines, File dir )
+    private Shell shell;
+
+    public BaseOSCommandProvider( Shell shell )
     {
-        Process p = null;
+        this.shell = shell;
+    }
+
+    @Override
+    public void delete( String fileName )
+    {
+        if( fileName != null )
+        {
+            if( new File( fileName ).isDirectory() )
+            {
+                execute( getRemoveDirectoryCommand(), fileName, getWorkingDir() );
+            }
+            else
+            {
+                execute( getRemoveFileCommand(), fileName, getWorkingDir() );
+            }
+        }
+    }
+
+    protected void execute( String command, String argLines, File workingDir )
+    {
         try
         {
-            p = Runtime.getRuntime().exec( command + " " + argLines, null, dir );
+            final Process p = Runtime.getRuntime().exec( command + " " + argLines, null, workingDir );
 
             p.waitFor();
 
@@ -40,23 +64,49 @@ public abstract class BaseOSCommandProvider implements OSCommandProvider
                     printMessage( input );
                 }
             }
+
         }
         catch( Exception e )
         {
             LOGGER.warning( "The command did not complete successfully" );
-            return;
         }
     }
 
-    protected String getWorkingDir()
+    protected abstract String getListCommand();
+
+    protected abstract String getMkdirCommand();
+
+    protected abstract String getRemoveDirectoryCommand();
+
+    protected abstract String getRemoveFileCommand();
+
+    protected File getWorkingDir()
     {
-        //There should be a method that get the directory of "Ray"
-        return System.getProperty( "user.dir" );
+        return new File( shell.getWorkingDir() );
+    }
+
+    @Override
+    public void list( String pathName )
+    {
+        if( pathName == null )
+        {
+            pathName = "";
+        }
+
+        execute( getListCommand(), pathName, getWorkingDir() );
+    }
+
+    @Override
+    public void mkdir( String dirName )
+    {
+        if( dirName != null )
+        {
+            execute( getMkdirCommand(), dirName, getWorkingDir() );
+        }
     }
 
     private void printMessage( InputStream contents )
     {
-
         final char[] buffer = new char[0x10000];
 
         StringBuilder out = new StringBuilder();
@@ -66,6 +116,7 @@ public abstract class BaseOSCommandProvider implements OSCommandProvider
         try
         {
             int read;
+
             do
             {
                 read = in.read( buffer, 0, buffer.length );
@@ -77,7 +128,8 @@ public abstract class BaseOSCommandProvider implements OSCommandProvider
             }
             while( read >= 0 );
 
-            if( out.toString().equals( "" ) ) {
+            if( out.toString().equals( "" ) )
+            {
                 return;
             }
 
@@ -85,7 +137,7 @@ public abstract class BaseOSCommandProvider implements OSCommandProvider
         }
         catch( IOException e )
         {
-            e.printStackTrace();
+            LOGGER.warning( e.getMessage() );
         }
     }
 

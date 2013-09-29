@@ -42,12 +42,12 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
         implements Shell {
 
     private static final String MY_SLOT = AbstractShell.class.getName();
-    protected static final String ROO_PROMPT = "ray> ";
+    protected static final String RAY_PROMPT = "ray> ";
 
     // Public static fields; don't rename, make final, or make non-public, as
     // they are part of the public API, e.g. are changed by STS.
     public static String completionKeys = "TAB";
-    public static String shellPrompt = ROO_PROMPT;
+    public static String shellPrompt = RAY_PROMPT;
 
     public static String versionInfo() {
         // Try to determine the bundle version
@@ -111,6 +111,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     protected boolean inBlockComment;
     protected ExitShellRequest exitShellRequest;
     private Tailor tailor;
+    private String workingDir;
 
     @CliCommand(value = { "/*" }, help = "Start of block comment")
     public void blockCommentBegin() {
@@ -529,7 +530,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
      */
     public void setPromptPath(final String path) {
         shellPrompt = (StringUtils.isNotBlank(path) ? path + " " : "")
-                + ROO_PROMPT;
+                + RAY_PROMPT;
     }
 
     /**
@@ -545,6 +546,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
 
     public void setTailor(final Tailor tailor) {
         this.tailor = tailor;
+    }
+
+    public String getWorkingDir()
+    {
+        return this.workingDir;
+    }
+
+    public void setWorkingDir( String dir )
+    {
+        this.workingDir = dir;
     }
 
     @CliCommand(value = { "version" }, help = "Displays shell version")

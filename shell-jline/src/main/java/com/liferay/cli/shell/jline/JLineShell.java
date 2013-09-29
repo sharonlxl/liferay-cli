@@ -553,7 +553,7 @@ public abstract class JLineShell extends AbstractShell implements
     public void setPromptPath(final String path, final boolean overrideStyle) {
         if (reader.getTerminal().isANSISupported()) {
             if (StringUtils.isBlank(path)) {
-                shellPrompt = AnsiEscapeCode.decorate(ROO_PROMPT,
+                shellPrompt = AnsiEscapeCode.decorate(RAY_PROMPT,
                         AnsiEscapeCode.FG_YELLOW);
             }
             else {
@@ -561,7 +561,7 @@ public abstract class JLineShell extends AbstractShell implements
                         .decorate(path) : AnsiEscapeCode.decorate(path,
                         AnsiEscapeCode.FG_CYAN);
                 shellPrompt = decoratedPath
-                        + AnsiEscapeCode.decorate(" " + ROO_PROMPT,
+                        + AnsiEscapeCode.decorate(" " + RAY_PROMPT,
                                 AnsiEscapeCode.FG_YELLOW);
             }
         }

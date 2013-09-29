@@ -85,6 +85,7 @@ public class PomManagementServiceImpl implements PomManagementService {
                 OSGiUtils.getRayWorkingDirectory(context),
                 FileUtils.CURRENT_DIRECTORY));
         projectRootDirectory = FileUtils.getCanonicalPath(projectDirectory);
+        shell.setWorkingDir( projectRootDirectory );
     }
 
     /**
@@ -321,6 +322,8 @@ public class PomManagementServiceImpl implements PomManagementService {
             return;
         }
         focusedModulePath = focusedModule.getPath();
+
+        shell.setWorkingDir( new File( focusedModulePath ).getParent() );
         shell.setPromptPath(focusedModule.getModuleName());
     }
 

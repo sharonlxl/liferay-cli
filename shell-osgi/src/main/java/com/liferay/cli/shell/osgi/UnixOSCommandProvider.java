@@ -1,60 +1,45 @@
 package com.liferay.cli.shell.osgi;
 
-import java.io.File;
+import com.liferay.cli.shell.Shell;
+
 
 /**
  * @author Sharon Li
  */
 public class UnixOSCommandProvider extends BaseOSCommandProvider
 {
-
-    private static final String REMOVE_FILE_COMMAND = "rm";
-    private static final String REMOVE_DIRECTORY_COMMAND = "rm -r";
     private static final String LS_COMMAND = "ls -l";
     private static final String MKDIR_COMMAND = "mkdir -p";
+    private static final String REMOVE_DIRECTORY_COMMAND = "rm -rf";
+    private static final String REMOVE_FILE_COMMAND = "rm -f";
 
-    public UnixOSCommandProvider()
+    public UnixOSCommandProvider( Shell shell )
     {
+        super( shell );
     }
 
     @Override
-    public void delete( String fileName )
+    protected String getListCommand()
     {
-        if( fileName == null )
-        {
-            fileName = "";
-        }
-
-        if( new File( fileName ).isDirectory() )
-        {
-            execute( REMOVE_DIRECTORY_COMMAND, fileName, null );
-        }
-        else
-        {
-            execute( REMOVE_FILE_COMMAND, fileName, null );
-        }
+        return LS_COMMAND;
     }
 
     @Override
-    public void list( String pathName )
+    protected String getMkdirCommand()
     {
-        if( pathName == null )
-        {
-            pathName = getWorkingDir();
-        }
-
-        execute( LS_COMMAND, pathName, null );
+        return MKDIR_COMMAND;
     }
 
     @Override
-    public void mkdir( String dirName )
+    protected String getRemoveDirectoryCommand()
     {
-        if( dirName == null )
-        {
-            dirName = "";
-        }
+        return REMOVE_DIRECTORY_COMMAND;
+    }
 
-        execute( MKDIR_COMMAND, dirName, null );
+    @Override
+    protected String getRemoveFileCommand()
+    {
+        return REMOVE_FILE_COMMAND;
     }
 
 }

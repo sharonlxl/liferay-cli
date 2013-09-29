@@ -1,62 +1,44 @@
 package com.liferay.cli.shell.osgi;
 
-import java.io.File;
+import com.liferay.cli.shell.Shell;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-
-@Component
-@Service
+/**
+ * @author Sharon Li
+ */
 public class WindowsOSCommandProvider extends BaseOSCommandProvider
 {
-
     private static final String DIR_COMMAND = "cmd /C dir";
     private static final String DELETE_FILE_COMMAND = "cmd /C del /Q";
     private static final String DELETE_DIRECTORY_COMMAND = "cmd /C rmdir";
     private static final String MKDIR_COMMAND = "cmd /C mkdir";
 
-    public WindowsOSCommandProvider()
+    public WindowsOSCommandProvider( Shell shell )
     {
+        super( shell );
     }
 
     @Override
-    public void delete( String fileName )
+    protected String getRemoveFileCommand()
     {
-        if (fileName == null)
-        {
-            fileName = "";
-        }
-
-        if( new File( fileName ).isDirectory() )
-        {
-            execute( DELETE_DIRECTORY_COMMAND, fileName, null );
-        }
-        else
-        {
-            execute( DELETE_FILE_COMMAND, fileName, null );
-        }
+        return DELETE_FILE_COMMAND;
     }
 
     @Override
-    public void list( String pathName )
+    protected String getRemoveDirectoryCommand()
     {
-        if( pathName == null )
-        {
-            pathName = getWorkingDir();
-        }
-
-        execute( DIR_COMMAND, pathName, null );
+        return DELETE_DIRECTORY_COMMAND;
     }
 
     @Override
-    public void mkdir( String dirName )
+    protected String getListCommand()
     {
-        if( dirName == null )
-        {
-            dirName = "";
-        }
+        return DIR_COMMAND;
+    }
 
-        execute( MKDIR_COMMAND, dirName, null );
+    @Override
+    protected String getMkdirCommand()
+    {
+        return MKDIR_COMMAND;
     }
 
 }

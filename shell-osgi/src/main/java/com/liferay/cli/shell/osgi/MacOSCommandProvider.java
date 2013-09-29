@@ -1,31 +1,14 @@
 package com.liferay.cli.shell.osgi;
 
+import com.liferay.cli.shell.Shell;
+
 /**
  * @author Sharon Li
  */
 public class MacOSCommandProvider extends UnixOSCommandProvider
 {
-    public MacOSCommandProvider()
+    public MacOSCommandProvider( Shell shell )
     {
-        super();
+        super( shell );
     }
-
-    @Override
-    public void delete( String fileName )
-    {
-        super.delete( fileName );
-    }
-
-    @Override
-    public void list( String pathName )
-    {
-        super.list( pathName );
-    }
-
-    @Override
-    public void mkdir( String dirName )
-    {
-        super.mkdir( dirName );
-    }
-
 }
