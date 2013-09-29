@@ -27,4 +27,10 @@ public @interface CliCommand {
      * @return Indicates if this command should only be shown when CLI is set to 'advanced' mode.
      */
     boolean advanced() default false;
+    
+    /**
+     * @return Indicates if this command is a system command and is always available but should never
+     * be shown in the 'help' command
+     */
+    boolean system() default false;
 }
