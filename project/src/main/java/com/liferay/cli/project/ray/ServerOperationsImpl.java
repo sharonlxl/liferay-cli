@@ -82,15 +82,58 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
             pomService.getRootPom().getPath(), XmlUtils.nodeToString( rootPomDocument ), updatedProperties, false );
 
         // add <modules>
-        addLogfixModule( rootPom, rootTopLevelPackage, parentGAV );
+        final Pom logfix = pomService.getPomFromModuleName( "logfix" );
 
-        pomService.setFocusedModule( rootPom );
+        if( logfix == null )
+        {
+            addLogfixModule( rootPom, rootTopLevelPackage, parentGAV );
+            pomService.setFocusedModule( rootPom );
+        }
 
-        addServerModule( rootPom, rootTopLevelPackage, parentGAV, serverVersion );
+        final Pom server = pomService.getPomFromModuleName( "server" );
 
-        pomService.setFocusedModule( rootPom );
+        if( server == null )
+        {
+            addServerModule( rootPom, rootTopLevelPackage, parentGAV, serverVersion );
+        }
+        else
+        {
+            updateServerModule( server, serverType, serverVersion, serverEdition  );
+        }
+
+        // need to 'clean' server module
+        pomService.setFocusedModule( server );
+
+        try
+        {
+            executeMvnCommand( "-Dmaven.test.skip=true clean" );
+        }
+        catch( IOException e )
+        {
+            e.printStackTrace();
+        }
+
 
         fileManager.commit();
+    }
+
+    private void updateServerModule(
+        Pom serverPom, ServerType serverType, ServerVersion serverVersion, ServerEdition serverEdition )
+    {
+        final Document serverPomDocument = XmlUtils.readXml( fileManager.getInputStream( serverPom.getPath() ) );
+        final Element serverPomRoot = serverPomDocument.getDocumentElement();
+
+        // add <properties> element
+        final Element serverPropertiesElement = DomUtils.createChildIfNotExists("properties", serverPomRoot, serverPomDocument);
+
+        final Element liferayVersionElement = DomUtils.createChildIfNotExists("liferay.version", serverPropertiesElement, serverPomDocument);
+        liferayVersionElement.setTextContent( getLatestAvailableServerVersion( serverVersion.getDisplayName() ) );
+
+        final String updatedServerProperties =
+            getDescriptionOfChange( "updated", Collections.singleton( serverPom.getDisplayName() ), "property", "properties" );
+
+        fileManager.createOrUpdateTextFileIfRequired(
+            serverPom.getPath(), XmlUtils.nodeToString( serverPomDocument ), updatedServerProperties, false );
     }
 
     private void addServerModule( Pom rootPom, JavaPackage rootTopLevelPackage, GAV parentGAV, ServerVersion serverVersion )
@@ -297,6 +340,10 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         if( "6.1".equals( serverVersion ) )
         {
             return "6.1.2";
+        }
+        else if( "6.2".equals( serverVersion ) )
+        {
+            return "6.2.0-RC2";
         }
 
         return serverVersion;
