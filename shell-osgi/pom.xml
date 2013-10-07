@@ -34,5 +34,9 @@
             <groupId>com.liferay.cli</groupId>
             <artifactId>com.liferay.cli.shell</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.liferay.cli</groupId>
+            <artifactId>com.liferay.cli.metadata</artifactId>
+        </dependency>
     </dependencies>
 </project>

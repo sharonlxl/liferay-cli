@@ -1,5 +1,6 @@
 package com.liferay.cli.shell.osgi;
 
+import com.liferay.cli.metadata.MetadataService;
 import com.liferay.cli.shell.Shell;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -18,6 +19,9 @@ public class OSCommandServiceImpl implements OSCommandService
     @Reference
     Shell shell;
 
+    @Reference
+    MetadataService metadataService;
+
     private OSCommandProvider commandProvider = null;
 
     @Override
@@ -27,15 +31,15 @@ public class OSCommandServiceImpl implements OSCommandService
         {
             if ( SystemUtils.IS_OS_WINDOWS )
             {
-                commandProvider = new WindowsOSCommandProvider( shell );
+                commandProvider = new WindowsOSCommandProvider( shell, metadataService );
             }
             else if ( SystemUtils.IS_OS_UNIX )
             {
-                commandProvider = new UnixOSCommandProvider( shell );
+                commandProvider = new UnixOSCommandProvider( shell, metadataService );
             }
             else if ( SystemUtils.IS_OS_MAC_OSX )
             {
-                commandProvider = new MacOSCommandProvider( shell );
+                commandProvider = new MacOSCommandProvider( shell, metadataService );
             }
         }
 

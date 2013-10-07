@@ -1,5 +1,6 @@
 package com.liferay.cli.shell.osgi;
 
+import com.liferay.cli.metadata.MetadataService;
 import com.liferay.cli.shell.Shell;
 
 /**
@@ -7,8 +8,8 @@ import com.liferay.cli.shell.Shell;
  */
 public class MacOSCommandProvider extends UnixOSCommandProvider
 {
-    public MacOSCommandProvider( Shell shell )
+    public MacOSCommandProvider( Shell shell, MetadataService metadataService )
     {
-        super( shell );
+        super( shell, metadataService );
     }
 }

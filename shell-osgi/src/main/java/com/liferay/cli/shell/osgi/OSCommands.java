@@ -2,7 +2,7 @@ package com.liferay.cli.shell.osgi;
 
 import com.liferay.cli.shell.CliCommand;
 import com.liferay.cli.shell.CliOption;
-import com.liferay.cli.shell.CommandMarker;
+import com.liferay.cli.shell.SystemCommandMarker;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -13,7 +13,7 @@ import org.apache.felix.scr.annotations.Service;
  */
 @Component( immediate = true )
 @Service
-public class OSCommands implements CommandMarker
+public class OSCommands implements SystemCommandMarker
 {
 
     private static final String REMOVE_FILE_WINDOWS = "del";

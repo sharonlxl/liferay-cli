@@ -1,12 +1,6 @@
 package com.liferay.cli.project.ray;
 
-import static com.liferay.cli.file.monitor.event.FileOperation.CREATED;
-import static com.liferay.cli.file.monitor.event.FileOperation.DELETED;
-import static com.liferay.cli.file.monitor.event.FileOperation.RENAMED;
-import static com.liferay.cli.file.monitor.event.FileOperation.UPDATED;
-
 import com.liferay.cli.file.monitor.NotifiableFileMonitorService;
-import com.liferay.cli.file.monitor.event.FileOperation;
 import com.liferay.cli.model.JavaPackage;
 import com.liferay.cli.process.manager.ProcessManager;
 import com.liferay.cli.project.GAV;
@@ -20,6 +14,7 @@ import com.liferay.cli.project.packaging.PomPackaging;
 import com.liferay.cli.support.util.DomUtils;
 import com.liferay.cli.support.util.XmlUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -42,7 +37,7 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
 {
 
 
-    private static final FileOperation[] MONITORED_OPERATIONS = { CREATED, RENAMED, UPDATED, DELETED };
+//    private static final FileOperation[] MONITORED_OPERATIONS = { CREATED, RENAMED, UPDATED, DELETED };
 
     @Reference
     private ProcessManager processManager;
@@ -116,16 +111,46 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
         return true;
     }
 
-    public boolean isCreateProjectAvailable()
+    public Object isCreateProjectCommandAvailable()
     {
-        return !isProjectAvailable( getFocusedModuleName() ) && isSafeLocation();
+        boolean projectAvailable = isProjectAvailable( getFocusedModuleName() );
+
+        if( projectAvailable )
+        {
+            return "There is already a project created in this directory.";
+        }
+
+        return checkForSafeLocation();
     }
 
-    private boolean isSafeLocation()
+    private String checkForSafeLocation()
     {
-        // TODO RAY finish implementation, should make sure that we aren't in bad directories like
-        // ray source code (liferay-cli) or in the user's home directory, others???
-        return true;
+        // the current directory of the ray shell instance
+        final File rayDir = shell.getHome();
+
+        // check if its the user's home directory or the liferay-cli directory
+        final File userHome = new File( System.getProperty( "user.home" ) );
+
+        if( rayDir.equals( userHome ) )
+        {
+            return "Current directory is user home directory.";
+        }
+
+//        int numFiles = org.apache.commons.io.FileUtils.listFiles( rayDir, null, true ).size();
+
+//        if( numFiles > 20 )
+//        {
+//            return "Current directory already contains many files.  This Ray tool will generate lots of new files that may conflict.";
+//        }
+
+//        final File pomXml = new File( rayDir, "pom.xml" );
+
+//        if( pomXml.exists() )
+//        {
+//            return "Current directory already contains a pom.xml file.  A new project can't be started.";
+//        }
+
+        return null;
     }
 
     /* (non-Javadoc)
@@ -244,6 +269,11 @@ public class RayOperationsImpl extends MavenOperationsImpl implements RayOperati
 
     @Override
     public boolean isDeployAvailable()
+    {
+        return pomService.getPomFromModuleName( "server" ) != null && isPlugin( pomService.getFocusedModule() );
+    }
+
+    private boolean isPlugin( Pom focusedModule )
     {
         //TODO RAY make sure that the currently focused module is a liferay plugin
         return true;

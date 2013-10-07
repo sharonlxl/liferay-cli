@@ -604,13 +604,12 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             return sb.toString();
         }
 
-//        sb.append("    ____  ____  ____  ").append(LINE_SEPARATOR);
-//        sb.append("   / __ \\/ __ \\/ __ \\ ").append(LINE_SEPARATOR);
-//        sb.append("  / /_/ / / / / / / / ").append(LINE_SEPARATOR);
-//        sb.append(" / _, _/ /_/ / /_/ /  ").append(LINE_SEPARATOR);
-//        sb.append("/_/ |_|\\____/\\____/   ").append(" ").append(versionInfo())
-//                .append(LINE_SEPARATOR);
-//        sb.append(LINE_SEPARATOR);
+        sb.append("     dBP    dBP dBBBBP dBBBP dBBBBBb dBBBBBb dBP dBP").append(LINE_SEPARATOR);
+        sb.append("                                 dBP      BB    dBP  ").append(LINE_SEPARATOR);
+        sb.append("   dBP    dBP dBBBP  dBBP    dBBBBK'  dBP BB   dBP   ").append(LINE_SEPARATOR);
+        sb.append("  dBP    dBP dBP    dBP     dBP  BB  dBP  BB  dBP    ").append(LINE_SEPARATOR);
+        sb.append(" dBBBBP dBP dBP    dBBBBP  dBP  dB' dBBBBBBB dBP    ").append(" ").append(versionInfo());
+        sb.append(LINE_SEPARATOR);
 
         return sb.toString();
     }

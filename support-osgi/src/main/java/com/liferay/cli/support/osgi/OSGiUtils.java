@@ -154,7 +154,7 @@ public final class OSGiUtils {
     }
 
     /**
-     * Returns the Roo working directory for the given OSGi component context
+     * Returns the Ray working directory for the given OSGi component context
      *
      * @param componentContext the component context (required)
      * @return the path of the Roo working directory

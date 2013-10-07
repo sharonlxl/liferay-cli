@@ -26,4 +26,6 @@ public interface ServerOperations extends ProjectOperations
     boolean isServerSetupAvailable();
 
     boolean isServerStartAvailable();
+
+    boolean isServerStopAvailable();
 }

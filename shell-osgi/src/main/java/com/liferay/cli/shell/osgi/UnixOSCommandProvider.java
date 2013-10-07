@@ -1,5 +1,6 @@
 package com.liferay.cli.shell.osgi;
 
+import com.liferay.cli.metadata.MetadataService;
 import com.liferay.cli.shell.Shell;
 
 
@@ -13,9 +14,9 @@ public class UnixOSCommandProvider extends BaseOSCommandProvider
     private static final String REMOVE_DIRECTORY_COMMAND = "rm -rf";
     private static final String REMOVE_FILE_COMMAND = "rm -f";
 
-    public UnixOSCommandProvider( Shell shell )
+    public UnixOSCommandProvider( Shell shell, MetadataService metadataService )
     {
-        super( shell );
+        super( shell, metadataService );
     }
 
     @Override

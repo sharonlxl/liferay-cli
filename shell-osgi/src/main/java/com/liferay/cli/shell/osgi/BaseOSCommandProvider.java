@@ -1,5 +1,6 @@
 package com.liferay.cli.shell.osgi;
 
+import com.liferay.cli.metadata.MetadataService;
 import com.liferay.cli.shell.Shell;
 import com.liferay.cli.support.logging.HandlerUtils;
 
@@ -20,9 +21,12 @@ public abstract class BaseOSCommandProvider implements OSCommandProvider
 
     private Shell shell;
 
-    public BaseOSCommandProvider( Shell shell )
+    private MetadataService metadataService;
+
+    public BaseOSCommandProvider( Shell shell, MetadataService metadataService )
     {
         this.shell = shell;
+        this.metadataService = metadataService;
     }
 
     @Override

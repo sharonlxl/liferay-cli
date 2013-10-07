@@ -1,5 +1,6 @@
 package com.liferay.cli.shell.osgi;
 
+import com.liferay.cli.metadata.MetadataService;
 import com.liferay.cli.shell.Shell;
 
 /**
@@ -12,9 +13,9 @@ public class WindowsOSCommandProvider extends BaseOSCommandProvider
     private static final String DELETE_DIRECTORY_COMMAND = "cmd /C rmdir";
     private static final String MKDIR_COMMAND = "cmd /C mkdir";
 
-    public WindowsOSCommandProvider( Shell shell )
+    public WindowsOSCommandProvider( Shell shell, MetadataService metadataService )
     {
-        super( shell );
+        super( shell, metadataService );
     }
 
     @Override

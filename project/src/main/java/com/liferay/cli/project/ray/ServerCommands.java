@@ -90,4 +90,9 @@ public class ServerCommands implements CommandMarker
         return serverOperations.isServerStartAvailable();
     }
 
+    @CliAvailabilityIndicator( SERVER_STOP_COMMAND )
+    public boolean isServerStopAvailable()
+    {
+        return serverOperations.isServerStopAvailable();
+    }
 }

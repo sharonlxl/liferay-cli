@@ -90,20 +90,20 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
             pomService.setFocusedModule( rootPom );
         }
 
-        final Pom server = pomService.getPomFromModuleName( "server" );
-
-        if( server == null )
+        if( getServerPom() == null )
         {
             addServerModule( rootPom, rootTopLevelPackage, parentGAV, serverVersion );
         }
         else
         {
+            final Pom server = getServerPom();
             updateServerModule( server, serverType, serverVersion, serverEdition  );
         }
 
-        // need to 'clean' server module
+        final Pom server = getServerPom();
         pomService.setFocusedModule( server );
 
+        // need to 'clean' server module
         try
         {
             executeMvnCommand( "-Dmaven.test.skip=true clean" );
@@ -113,8 +113,12 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
             e.printStackTrace();
         }
 
-
         fileManager.commit();
+    }
+
+    private Pom getServerPom()
+    {
+        return pomService.getPomFromModuleName( "server" );
     }
 
     private void updateServerModule(
@@ -222,7 +226,12 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
     @Override
     public void serverStart()
     {
-        final Pom serverPom = pomService.getPomFromModuleName( "server" );
+        final Pom serverPom = getServerPom();
+
+        final String liferayVersion = serverPom.getProperty( "liferay.version" ).getValue();
+
+        LOGGER.info( "Starting embedded Liferay Portal v" + liferayVersion + " server..." );
+
         final String workingDir = new File( serverPom.getPath() ).getParent(); // TODO RAY handle unexpected results better
 
         final String serverArtifactId = serverPom.getArtifactId();
@@ -238,7 +247,6 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
                 break;
             }
         }
-
 
         final List<String> pluginArtifactIds = new ArrayList<String>();
 
@@ -259,6 +267,8 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
 
                 // lets build the plugin so its /target/outputDirectory will be created for embedded tomcat to add
                 pomService.setFocusedModule( pluginPom );
+
+                LOGGER.info( "Deploying plugin " + pluginPom.getArtifactId() );
 
                 try
                 {
@@ -281,7 +291,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
     @Override
     public void serverStop()
     {
-        final Pom serverPom = pomService.getPomFromModuleName( "server" );
+        final Pom serverPom = getServerPom();
         final String workingDir = new File( serverPom.getPath() ).getParent(); // TODO RAY handle unexpected results better
 
         final ExternalConsoleProvider externalShellProvider = externalShellProviderRegistry.getExternalShellProvider();
@@ -322,10 +332,19 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         return externalShellProviderRegistry.getExternalShellProvider() != null && checkValidServerSetup();
     }
 
+    @Override
+    public boolean isServerStopAvailable()
+    {
+        // TODO RAY finish impl
+
+        return checkValidServerSetup();
+    }
+
     private boolean checkValidServerSetup()
     {
         //TODO RAY finish impl
-        return true;
+
+        return pomService.getPomFromModuleName( "server" ) != null;
     }
 
     private String getServerEditionValue( ServerEdition serverEdition )
@@ -343,7 +362,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         }
         else if( "6.2".equals( serverVersion ) )
         {
-            return "6.2.0-RC2";
+            return "6.2.0-RC3";
         }
 
         return serverVersion;

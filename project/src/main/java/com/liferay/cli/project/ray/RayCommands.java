@@ -45,11 +45,11 @@ public class RayCommands implements CommandMarker
     public void createProject(
         @CliOption(
             key = { "", "projectName" },
-            help = "The name of the project (last segment of package name used as default)" )
+            mandatory = true,
+            help = "The name of the project" )
         final String projectName,
         @CliOption(
             key = { "topLevelPackage" },
-            mandatory = false,
             optionContext = "update",
             help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Ray's shell)" )
         final JavaPackage topLevelPackage )
@@ -80,9 +80,9 @@ public class RayCommands implements CommandMarker
     }
 
     @CliAvailabilityIndicator( PROJECT_COMMAND )
-    public boolean isCreateProjectAvailable()
+    public Object isCreateProjectAvailable()
     {
-        return rayOperations.isCreateProjectAvailable();
+        return rayOperations.isCreateProjectCommandAvailable();
     }
 
     @CliAvailabilityIndicator( PLUGIN_CREATE_COMMAND )

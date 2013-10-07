@@ -26,7 +26,7 @@ public interface RayOperations extends ProjectOperations
      *
      * @return see above
      */
-    boolean isCreateProjectAvailable();
+    Object isCreateProjectCommandAvailable();
 
 
     void createPlugin( String pluginName, PluginType pluginType );

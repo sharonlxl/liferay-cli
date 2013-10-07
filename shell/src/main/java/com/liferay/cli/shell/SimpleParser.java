@@ -151,6 +151,7 @@ public class SimpleParser implements Parser {
     private final Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
     private final Set<CommandMarker> commands = new HashSet<CommandMarker>();
     private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
+    private final Map<Method, String> availableMsgs = new HashMap<Method, String>();
 
     private final Object mutex = new Object();
 
@@ -165,10 +166,10 @@ public class SimpleParser implements Parser {
                             method.getParameterTypes().length == 0,
                             "CliAvailabilityIndicator is only legal for 0 parameter methods ('%s')",
                             method.toGenericString());
-                    Validate.isTrue(
-                            method.getReturnType().equals(Boolean.TYPE),
-                            "CliAvailabilityIndicator is only legal for primitive boolean return types (%s)",
-                            method.toGenericString());
+//                    Validate.isTrue(
+//                            method.getReturnType().equals(Boolean.TYPE),
+//                            "CliAvailabilityIndicator is only legal for primitive boolean return types (%s)",
+//                            method.toGenericString());
                     for (final String cmd : availability.value()) {
                         Validate.isTrue(
                                 !availabilityIndicators.containsKey(cmd),
@@ -240,6 +241,11 @@ public class SimpleParser implements Parser {
             if (targets.size() > 1) {
                 // Assist them locate a particular target
                 for (final MethodTarget target : targets) {
+                    if( target.getTarget() instanceof SystemCommandMarker )
+                    {
+                        continue;
+                    }
+
                     // Calculate the correct starting position
                     final int startAt = translated.length();
 
@@ -264,6 +270,7 @@ public class SimpleParser implements Parser {
             // Identify the command we're working with
             final CliCommand cmd = methodTarget.getMethod().getAnnotation(
                     CliCommand.class);
+
             Validate.notNull(cmd, "CliCommand unavailable for '%s'",
                     methodTarget.getMethod().toGenericString());
 
@@ -1051,7 +1058,7 @@ public class SimpleParser implements Parser {
                 final CliCommand cmd = method.getAnnotation(CliCommand.class);
                 if (cmd != null) {
                     // We have a @CliCommand.
-                    if (checkAvailabilityIndicators) {
+//                    if (checkAvailabilityIndicators) {
                         // Decide if this @CliCommand is available at this
                         // moment
                         Boolean available = null;
@@ -1063,22 +1070,32 @@ public class SimpleParser implements Parser {
                                                 + method.toGenericString()
                                                 + "'");
                                 try {
-                                    available = (Boolean) mt.getMethod()
+                                    Object retval = mt.getMethod()
                                             .invoke(mt.getTarget());
                                     // We should "break" here, but we loop over
                                     // all to ensure no conflicting availability
                                     // indicators are defined
+
+                                    if( retval instanceof String )
+                                    {
+                                        availableMsgs.put( method, retval.toString() );
+                                        available = Boolean.FALSE;
+                                    }
+                                    else if( retval instanceof Boolean )
+                                    {
+                                        available = (Boolean)retval;
+                                    }
                                 }
                                 catch (final Exception e) {
-                                    available = false;
+                                    available = Boolean.FALSE;
                                 }
                             }
                         }
                         // Skip this @CliCommand if it's not available
-                        if (available != null && !available) {
+                        if (available != null && checkAvailabilityIndicators && !available) {
                             continue;
                         }
-                    }
+//                    }
 
                     if( isModeAllowed( cmd ) )
                     {
@@ -1240,9 +1257,22 @@ public class SimpleParser implements Parser {
                     commandNotFound(LOGGER, input);
                 }
                 else {
-                    LOGGER.warning("Command '"
-                            + input
-                            + "' was found but is not currently available (type 'help' then ENTER to learn about this command)");
+                    if( matchingTargets.size() == 1 )
+                    {
+                        String msg = availableMsgs.get( matchingTargets.iterator().next().getMethod() );
+
+                        LOGGER.warning("Command '"
+                                + input
+                                + "' was found but is not currently available due to reason below." + LINE_SEPARATOR);
+                        LOGGER.warning( msg + LINE_SEPARATOR );
+                        LOGGER.warning( "(type 'help' then ENTER to learn about this command)" + LINE_SEPARATOR);
+                    }
+                    else
+                    {
+                        LOGGER.warning("Command '"
+                                + input
+                                + "' was found but is not currently available (type 'help' then ENTER to learn about this command)");
+                    }
                 }
                 return null;
             }
