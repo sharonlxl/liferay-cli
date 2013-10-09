@@ -114,6 +114,8 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         }
 
         fileManager.commit();
+
+        pomService.setFocusedModule( rootPom );
     }
 
     private Pom getServerPom()
@@ -256,7 +258,7 @@ public class ServerOperationsImpl extends MavenOperationsImpl implements ServerO
         {
             for( Module module : pluginsPom.getModules() )
             {
-                Pom pluginPom = pomService.getPomFromModuleName( "plugins\\" + module.getName() );
+                Pom pluginPom = pomService.getPomFromModuleName( "plugins" + IOUtils.DIR_SEPARATOR  + module.getName() );
 
                 final String pluginArtifactId = pluginPom.getArtifactId();
 
